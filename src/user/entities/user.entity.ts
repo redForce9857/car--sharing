@@ -12,8 +12,11 @@ export class UserEntity {
     @Column()
     email: string;
 
-    @Column({default: ' '})
-    bio: string;
+    @Column({default: false})
+    isAdmin: boolean
+
+    @Column({ type: 'timestamp' })
+    canRental?: Date
 
     @Column({select: false})
     password: string;

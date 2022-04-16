@@ -59,9 +59,4 @@ export class UserController {
    const user = await this.userService.update(idOfCurrentUser, updateUserDto);
    return this.userService.buildUserResponse(user)
   }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
-  }
 }

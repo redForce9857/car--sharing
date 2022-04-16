@@ -9,7 +9,7 @@ import {UserResponseInterface} from "./types/userResponse.interface";
 import {LoginUserDto} from "./dto/login-user.dto";
 import {compare} from 'bcrypt';
 import {JWT_TOKEN} from "../config";
-import {watch} from "fs/promises";
+import {CarEntity} from "../car/entities/car.entity";
 
 @Injectable()
 export class UserService {
@@ -51,7 +51,7 @@ export class UserService {
     const userLogin = await this.userRepo.findOne({
         email: loginUserDto.email
     },
-        {select: ['id', 'username', 'email', 'bio', 'password']})
+        {select: ['id', 'username', 'email', 'password']})
     if (!userLogin){
       throw new HttpException('Credential is not valid', HttpStatus.UNPROCESSABLE_ENTITY)
     }
@@ -63,27 +63,8 @@ export class UserService {
     return userLogin
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  findAll() {
-    return `This action returns all user`;
+  async findAll(): Promise<UserEntity[]> {
+    return await this.userRepo.find()
   }
 
   findById(id: number): Promise<UserEntity> {
@@ -97,9 +78,5 @@ export class UserService {
     }
     Object.assign(user, updateUserDto);
     return await this.userRepo.save(user)
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
   }
 }

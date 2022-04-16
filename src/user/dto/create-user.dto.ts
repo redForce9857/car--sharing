@@ -9,5 +9,8 @@ export class CreateUserDto {
     readonly email: string;
 
     @IsNotEmpty()
+    readonly IsAdmin: boolean;
+
+    @IsNotEmpty()
     readonly password: string;
 }

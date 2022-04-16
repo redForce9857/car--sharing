@@ -1,26 +1,37 @@
-import { Injectable } from '@nestjs/common';
+import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
 import { CreateCarDto } from './dto/create-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
+import {InjectRepository} from "@nestjs/typeorm";
+import {CarEntity} from "./entities/car.entity";
+import {Repository} from "typeorm";
 
 @Injectable()
 export class CarService {
-  create(createCarDto: CreateCarDto) {
-    return 'This action adds a new car';
+  constructor(@InjectRepository(CarEntity) private readonly carRepo: Repository<CarEntity>) {}
+
+  async create(createCarDto: CreateCarDto): Promise<CarEntity> {
+    Object.assign(createCarDto)
+   return await this.carRepo.save(createCarDto)
   }
 
-  findAll() {
-    return `This action returns all car`;
+  async findAll(): Promise<CarEntity[]> {
+    return await this.carRepo.find()
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} car`;
+  async findOne(id: number): Promise<CarEntity> {
+    return await this.carRepo.findOne(id)
   }
 
-  update(id: number, updateCarDto: UpdateCarDto) {
-    return `This action updates a #${id} car`;
+  async update(id: number, updateCarDto: UpdateCarDto): Promise<CarEntity>{
+    const carUpdate = await this.carRepo.findOne(id)
+    if (!carUpdate){
+      throw new HttpException('the user not found', HttpStatus.NOT_FOUND)
+    }
+    Object.assign(carUpdate, updateCarDto);
+    return await this.carRepo.save(carUpdate)
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} car`;
+  async remove(id: number){
+    return await this.carRepo.delete(id)
   }
 }
