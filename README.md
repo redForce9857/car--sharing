@@ -5,26 +5,61 @@
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
 [circleci-url]: https://circleci.com/gh/nestjs/nest
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## TASK
+Deadline: 14 days
 
-## Description
+Project: Car Sharing
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Стек технологий: Node.js, Nestjs, PostgreSQL, TypeORM
+
+Тех задание:
+Произвести расчёт стоимости аренды автомобиля за период,
+Создание сессии аренды автомобиля
+Сформировать статистику о том, сколько км проехали на автомобиле, по дням, по каждому авто и по всем автомобилям.
+Исходные данные:
+
+Тарифы:
+- Первый тариф - 270 ₽ в день за 200 км в день
+- Второй тариф - 330 ₽ в день за 350 км в день
+- Третий тариф - 390 ₽ в день за 500 км в день
+
+Скидки:
+- 5% при бронировании от 3 до 5 дней
+- 10% при бронировании от 6 до 14 дней
+- 15% при бронировании от 15 до 30 дней
+
+Максимальный срок аренды: 30 дней.
+
+Парк автомобилей - 5 автомобилей (марка, модель, госномер, VIN)
+
+Условия:
+- Пауза между бронированиями должна составлять 3 дня
+- Начало и конец аренды не может выпадать на выходной день (суббота, воскресенье)
+
+Эндпоинты, которые должны быть:
+
+Автомобили:
+- Список всех авто (GET)
+- Один автомобиль (GET)
+- Создание (POST)
+- Редактирование  (PUT)
+- Удаление (DELETE)
+
+Аренда:
+- Создание сессии аренды автомобиля, где нужно выбрать автомобиль, тариф, срок аренды и соблюсти все выше указанные условия, посчитать итоговую сумму (POST)
+- Отмена аренды (DELETE)
+- Список всех заказов (GET)
+- Список только активных заказов (GET) (все заказы должны быть отсортированы по дате)
+
+Добавить для проекта car sharing:
+- валидацию - class-validator
+- авторизацию - jwt
+
+Бонус:
+Добавить для проекта car sharing:
+- docker
+- docker-compose
+- задеплоить проект куда-нибудь (на своё усмотрение)
 
 ## Installation
 
@@ -64,10 +99,7 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 
 ## Stay in touch
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- Author - Aibek
+- Telegram - [@redForce9857]
 
-## License
 
-Nest is [MIT licensed](LICENSE).
