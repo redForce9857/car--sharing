@@ -1,82 +1,30 @@
-import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from "@nestjs/typeorm";
 import {UserEntity} from "./entities/user.entity";
-import {InjectRepository} from "@nestjs/typeorm";
-import {Repository} from "typeorm";
-import {sign} from "jsonwebtoken"
-import {UserResponseInterface} from "./types/userResponse.interface";
-import {LoginUserDto} from "./dto/login-user.dto";
-import {compare} from 'bcrypt';
-import {JWT_TOKEN} from "../config";
-import {CarEntity} from "../car/entities/car.entity";
+import { Repository } from "typeorm";
+import {UserDto} from "./dto/create-user.dto";
 
 @Injectable()
-export class UserService {
-  constructor(@InjectRepository(UserEntity) private readonly userRepo: Repository<UserEntity>) {
-  }
-  async create(createUserDto: CreateUserDto): Promise<UserEntity>{
-    const userByEmailCheck = await this.userRepo.findOne({
-      email: createUserDto.email,
-    })
-    const userByUsernameCheck = await this.userRepo.findOne({
-      username: createUserDto.username,
-    })
-    if (userByEmailCheck || userByUsernameCheck){
-      throw new HttpException('Email or Username are taken', HttpStatus.UNPROCESSABLE_ENTITY)
-    }
-    const newUser = new UserEntity();
-    Object.assign(newUser, createUserDto)
-    return await this.userRepo.save(newUser);
+export class UsersService {
+  constructor(@InjectRepository(UserEntity) private userRepository: Repository<UserEntity>) {
   }
 
-  generateJwt(user: UserEntity): string{
-    return sign({
-      id: user.id,
-      username: user.username,
-      email: user.email,
-    }, JWT_TOKEN);
+  async getAllUsers():Promise<UserEntity[]> {
+    return this.userRepository.find();
   }
 
-  buildUserResponse(user: UserEntity): UserResponseInterface{
-    return {
-      user: {
-        ...user,
-        token: this.generateJwt(user)
-      },
-    };
+  async createUser(userDto: UserDto):Promise<UserEntity> {
+    const user = this.userRepository.create(userDto);
+    return this.userRepository.save(user);
   }
 
-  async login(loginUserDto: LoginUserDto): Promise<UserEntity>{
-    const userLogin = await this.userRepo.findOne({
-        email: loginUserDto.email
-    },
-        {select: ['id', 'username', 'email', 'password']})
-    if (!userLogin){
-      throw new HttpException('Credential is not valid', HttpStatus.UNPROCESSABLE_ENTITY)
-    }
-    const isPasswordCorrect = await compare(loginUserDto.password, userLogin.password)
-    if (!isPasswordCorrect){
-      throw new HttpException('Credential is not valid', HttpStatus.UNPROCESSABLE_ENTITY)
-    }
-    delete userLogin.password
-    return userLogin
+  async findUserByEmail(email: string):Promise<UserEntity> {
+    const user = await this.userRepository.findOne({email});
+    return user;
   }
 
-  async findAll(): Promise<UserEntity[]> {
-    return await this.userRepo.find()
-  }
-
-  findById(id: number): Promise<UserEntity> {
-    return this.userRepo.findOne(id)
-  }
-
-  async update(userId: number, updateUserDto: UpdateUserDto): Promise<UserEntity> {
-    const user = await this.findById(userId)
-    if (!user){
-      throw new HttpException('the user not found', HttpStatus.NOT_FOUND)
-    }
-    Object.assign(user, updateUserDto);
-    return await this.userRepo.save(user)
+  async getUserById(id: number):Promise<UserEntity> {
+    const user = await this.userRepository.findOne({id});
+    return user;
   }
 }

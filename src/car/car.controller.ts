@@ -1,38 +1,24 @@
-import {Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UsePipes, ValidationPipe} from '@nestjs/common';
-import { CarService } from './car.service';
-import { CreateCarDto } from './dto/create-car.dto';
-import { UpdateCarDto } from './dto/update-car.dto';
-import {AuthGuard} from "../user/guards/auth.guards";
+import {Body, Controller, Get, Param, Post} from "@nestjs/common";
+import {CarsService} from "./car.service";
+import {CarEntity} from "./entities/car.entity";
+import CarDto from "./dto/create-car.dto";
 
-@Controller()
-export class CarController {
-  constructor(private readonly carService: CarService) {}
+@Controller('cars')
+export class CarsController {
+  constructor(private carsService: CarsService) {}
 
-  @Post('car-sharing/car')
-  @UsePipes(new ValidationPipe())
-  create(@Body() createCarDto: CreateCarDto) {
-    return this.carService.create(createCarDto);
+  @Get()
+  getAllCars():Promise<CarEntity[]> {
+    return this.carsService.getAllCars();
   }
 
-  @Get('car-sharing/cars')
-  findAll() {
-    return this.carService.findAll();
+  @Get('id')
+  getCarById(@Param('id') id: number):Promise<CarEntity>{
+    return this.carsService.getCarById(id)
   }
 
-  @Get('car-sharing/car/:id')
-  findOne(@Param('id') id: string) {
-    return this.carService.findOne(+id);
-  }
-
-  @Patch('car-sharing/car/:id')
-  @UseGuards(AuthGuard)
-  update(@Param('id') id: string, @Body() updateCarDto: UpdateCarDto) {
-    return this.carService.update(+id, updateCarDto);
-  }
-
-  @Delete('car-sharing/car/:id')
-  @UseGuards(AuthGuard)
-  remove(@Param('id') id: string) {
-    return this.carService.remove(+id);
+  @Post()
+  createCar(@Body() carDto: CarDto):Promise<CarEntity> {
+    return this.carsService.createCar(carDto);
   }
 }

@@ -1,17 +1,24 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import {RentsEntity} from "../../rentals/entities/rental.entity";
 
-@Entity({name: "Cars"})
-export class CarEntity {
+
+@Entity({name: 'Tariffs'})
+export class TariffsEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
     @Column()
-    model: string;
+    name: string;
 
     @Column()
-    number: string;
+    price: number;
 
-    @OneToMany(() => RentsEntity, (rent) => rent.car)
+    @Column()
+    period: number;
+
+    @Column()
+    distance: number;
+
+    @OneToMany(() => RentsEntity, rents => rents.tariff)
     rents: RentsEntity[];
 }

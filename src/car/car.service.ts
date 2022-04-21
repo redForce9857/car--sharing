@@ -1,37 +1,23 @@
-import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
-import { CreateCarDto } from './dto/create-car.dto';
-import { UpdateCarDto } from './dto/update-car.dto';
-import {InjectRepository} from "@nestjs/typeorm";
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from "@nestjs/typeorm";
 import {CarEntity} from "./entities/car.entity";
-import {Repository} from "typeorm";
+import { Repository } from "typeorm";
+import CarDto from "./dto/create-car.dto";
 
 @Injectable()
-export class CarService {
-  constructor(@InjectRepository(CarEntity) private readonly carRepo: Repository<CarEntity>) {}
+export class CarsService {
+  constructor(@InjectRepository(CarEntity) private carRepository: Repository<CarEntity>) {}
 
-  async create(createCarDto: CreateCarDto): Promise<CarEntity> {
-    Object.assign(createCarDto)
-   return await this.carRepo.save(createCarDto)
+  getAllCars():Promise<CarEntity[]> {
+    return this.carRepository.find();
   }
 
-  async findAll(): Promise<CarEntity[]> {
-    return await this.carRepo.find()
+  createCar(carDto: CarDto):Promise<CarEntity> {
+    const car = this.carRepository.create(carDto);
+    return this.carRepository.save(car);
   }
 
-  async findOne(id: number): Promise<CarEntity> {
-    return await this.carRepo.findOne(id)
-  }
-
-  async update(id: number, updateCarDto: UpdateCarDto): Promise<CarEntity>{
-    const carUpdate = await this.carRepo.findOne(id)
-    if (!carUpdate){
-      throw new HttpException('the user not found', HttpStatus.NOT_FOUND)
-    }
-    Object.assign(carUpdate, updateCarDto);
-    return await this.carRepo.save(carUpdate)
-  }
-
-  async remove(id: number){
-    return await this.carRepo.delete(id)
+  async getCarById(id: number):Promise<CarEntity> {
+    return this.carRepository.findOne({id});
   }
 }

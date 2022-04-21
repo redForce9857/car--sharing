@@ -1,14 +1,26 @@
 import { Module } from '@nestjs/common';
-import { RentalsService } from './rentals.service';
-import { RentalsController } from './rentals.controller';
-import {TypeOrmModule} from "@nestjs/typeorm";
-import {RentalEntity} from "./entities/rental.entity";
-import {SaleEntity} from "../admin-resurce/entities/sale.entity";
-import {UserEntity} from "../user/entities/user.entity";
+import {RentsController} from "./rentals.controller";
+import {RentsService} from "./rentals.service";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import {RentsEntity} from "./entities/rental.entity";
+import { AuthModule } from "../auth/auth.module";
+import {UsersModule} from "../user/user.module";
+import {CarsModule} from "../car/car.module";
+import {TariffsModule} from "../tariffs/tariff.module";
+import {DiscountsModule} from "../discounts/discount.module";
+import RentValidator from "./validator/rentals.validator";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([RentalEntity, SaleEntity, UserEntity])],
-  controllers: [RentalsController],
-  providers: [RentalsService]
+  imports: [
+    TypeOrmModule.forFeature([RentsEntity]),
+    AuthModule,
+    CarsModule,
+    UsersModule,
+    TariffsModule,
+    DiscountsModule
+  ],
+  controllers: [RentsController],
+  providers: [RentsService, RentValidator],
+  exports: [RentsService]
 })
-export class RentalsModule {}
+export class RentsModule {}

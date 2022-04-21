@@ -1,68 +1,77 @@
-import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
-import {CreateRentalDto} from './dto/create-rental.dto';
-import {InjectRepository} from "@nestjs/typeorm";
-import {RentalEntity} from "./entities/rental.entity";
-import {DeleteResult, Repository} from "typeorm";
-import {UserEntity} from "../user/entities/user.entity";
-import {RentalResponseInterface} from "./types/rentalResponce.interface";
-import {SaleEntity} from "../admin-resurce/entities/sale.entity";
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from "@nestjs/typeorm";
+import {RentsEntity} from "./entities/rental.entity";
+import { Repository } from "typeorm";
+import RentDto from "./dto/create-rental.dto";
+import {UsersService} from "../user/user.service";
+import {TariffsService} from "../tariffs/tariff.service";
+import {CarsService} from "../car/car.service";
+import {DiscountsService} from "../discounts/discount.service";
+import {DiscountEntity} from "../discounts/entities/discount.entity";
+import RentValidator from "./validator/rentals.validator";
 
 @Injectable()
-export class RentalsService {
-  constructor(@InjectRepository(RentalEntity) private readonly rentalServiceRepo: Repository<RentalEntity>,
-              @InjectRepository(SaleEntity) private readonly saleRepository: Repository<SaleEntity>,
-              @InjectRepository(UserEntity) private readonly userRepository: Repository<UserEntity>) {}
+export class RentsService {
+  constructor(
+      @InjectRepository(RentsEntity) private rentsRepository: Repository<RentsEntity>,
+      private usersService: UsersService,
+      private tariffsService: TariffsService,
+      private carsService: CarsService,
+      private discountsService: DiscountsService,
+      private rentValidator: RentValidator
+  ) {}
 
-  async getRentals(): Promise<RentalEntity[]> {
-    return await this.rentalServiceRepo.find()
-  }
+  async createRent(rentDto: RentDto):Promise<any> {
+    try {
+      const period = this.getPeriod(rentDto.from, rentDto.to);
+      this.rentValidator.rentCreateValidator(rentDto.from, rentDto.to, period);
+      const discount = await this.getRentDiscount(period);
+      const car = await this.carsService.getCarById(rentDto.carId);
+      const tariff = await this.tariffsService.getTariffById(rentDto.tariffId);
+      const user = await this.usersService.getUserById(rentDto.userId);
 
-  async getActiveRentals(): Promise<RentalEntity[]> {
-    const rentals = await this.rentalServiceRepo.find({
-      order: {
-        rentalDate: "DESC"
-      }
-    })
-    return rentals.filter((rental) => rental.rentalDate.setDate(rental.rentalDate.getDate() + rental.rentalDay) > (new Date()).setDate((new Date()).getDate() + 0))
-  }
+      const payment = this.calculatePayment(period, tariff.price, discount?.discount);
 
-  async createRental(user: UserEntity, createRentalDto: CreateRentalDto): Promise<RentalEntity> {
-    const rental = await this.rentalServiceRepo.findOne()
-
-    if (rental) {
-      throw new HttpException('Rental already exists', HttpStatus.UNPROCESSABLE_ENTITY)
+      const rent = this.rentsRepository.create({...rentDto, discount, car, tariff, user, payment})
+      return this.rentsRepository.save(rent);
+    } catch (error) {
+      throw error;
     }
-    user.canRental = new Date()
-    user.canRental.setDate(user.canRental.getDate() + 3)
-    const newRental = new RentalEntity()
-    Object.assign(newRental, createRentalDto)
-    newRental.user = user
-    await this.rentalServiceRepo.save(user)
-    return await this.rentalServiceRepo.save(newRental)
   }
 
-  async deleteRental(userId: number, id: number): Promise<DeleteResult> {
-    const rental = await this.rentalServiceRepo.findOne({ id })
-
-    if (!rental) {
-      throw new HttpException('Rental does not exists', HttpStatus.UNPROCESSABLE_ENTITY)
-    }
-
-    if(rental.user.id !== userId) {
-      throw new HttpException('The rental does not belong to you', HttpStatus.FORBIDDEN)
-    }
-    return await this.rentalServiceRepo.delete(rental)
+  async getRentsCountByUserId(userId: number) {
+    const [{ count }] = await this.rentsRepository.query(`
+        SELECT count(id) from "Rents" WHERE "userId" = ${userId} 
+    `);
+    return Number(count);
   }
 
-  async buildRentalResponse(rental: RentalEntity): Promise<RentalResponseInterface> {
-    const sales = await this.saleRepository.find()
-    const [saleEntity] = sales.filter((sale) => sale.from <= rental.rentalDay && sale.to >= rental.rentalDay)
-    const sale = saleEntity.percentages
-    const total = rental.tariff.cost * rental.rentalDay * sale / 100
-    return {
-      ...rental,
-      total
-    }
-
+  async getTotalPaymentByUserId(userId: number) {
+    const [{ sum }] = await this.rentsRepository.query(`
+      SELECT sum(payment) from "Rents" WHERE "userId" = ${userId}
+    `);
+    return Number(sum);
   }
+
+  private async getRentDiscount(period):Promise<DiscountEntity> {
+    const discount = await this.discountsService.getDiscountByPeriod(period);
+    return discount;
+  }
+
+  private getPeriod(from, to): number {
+    const dateDifference = Number(new Date(to)) - Number(new Date(from));
+    const period = dateDifference / (1000 * 60 * 60 * 24);
+
+    return period;
+  }
+
+  private calculatePayment(period, tariffPrice, discount):number {
+    const payment = period * tariffPrice;
+
+    if (!discount) return payment;
+
+    return (payment * (100 - discount)) / 100;
+  }
+
+
 }

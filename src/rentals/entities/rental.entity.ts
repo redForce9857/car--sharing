@@ -1,28 +1,35 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, OneToOne, JoinColumn, ManyToOne } from "typeorm";
 import {UserEntity} from "../../user/entities/user.entity";
 import {CarEntity} from "../../car/entities/car.entity";
-import {TariffEntity} from "../../admin-resurce/entities/tarrif.entity";
+import {TariffsEntity} from "../../tariffs/entities/tariff.entity";
+import {DiscountEntity} from "../../discounts/entities/discount.entity";
 
-
-@Entity({name: 'rentals'})
-export class RentalEntity{
+@Entity({name: 'Rents'})
+export class RentsEntity {
     @PrimaryGeneratedColumn()
-    id: number
+    id: number;
 
-    @OneToOne(() => UserEntity)
-    @JoinColumn()
-    user: UserEntity
+    @Column({type: 'date', default: new Date()})
+    created_date: Date;
 
-    @OneToOne(() => CarEntity)
-    @JoinColumn()
-    car: CarEntity
+    @Column({type: 'date'})
+    from: Date;
 
-    @ManyToOne(() => TariffEntity, tariff => tariff.rentals)
-    tariff: TariffEntity
+    @Column({type: 'date'})
+    to: Date;
 
-    @Column()
-    rentalDay: number
+    @Column({type: "float"})
+    payment: number;
 
-    @Column()
-    rentalDate: Date
+    @ManyToOne(() => UserEntity, user => user.rents)
+    user: UserEntity;
+
+    @ManyToOne(() => CarEntity, car => car.rents)
+    car: CarEntity;
+
+    @ManyToOne(() => TariffsEntity, tariff => tariff.rents)
+    tariff: TariffsEntity;
+
+    @ManyToOne(() => DiscountEntity, discount => discount.rents)
+    discount: DiscountEntity;
 }

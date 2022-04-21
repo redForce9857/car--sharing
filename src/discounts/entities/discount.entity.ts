@@ -1,17 +1,20 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import {RentsEntity} from "../../rentals/entities/rental.entity";
 
-@Entity({name: 'Users'})
-export class UserEntity {
+@Entity({name: 'Discounts'})
+export class DiscountEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
     @Column()
-    email: string;
+    discount: number;
 
     @Column()
-    password: string;
+    from: number;
 
-    @OneToMany(() => RentsEntity, rent => rent.user)
-    rents: RentsEntity[]
+    @Column()
+    to: number;
+
+    @OneToMany(() => RentsEntity, rent => rent.discount)
+    rents: RentsEntity[];
 }
